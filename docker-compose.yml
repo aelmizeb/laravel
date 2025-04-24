@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      context: ./php
+    container_name: laravel_app
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    command: tail -f /dev/null  # <- This keeps the container alive
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  mysql-data:
